@@ -29,7 +29,7 @@ const LargeOrb = () => {
     },
     [hovered, down]
   );
-  const texture = useTexture("/hello.png");
+  const texture = useTexture("/baked.png");
 
   setTimeout(() => {
     setDistort(0.75);
