@@ -1,105 +1,142 @@
-import React, { useEffect, useState } from "react";
+import { Color } from "three";
+import React, { Suspense, useRef, useState, useEffect } from "react";
+import { Canvas, extend } from "@react-three/fiber";
 import GlobalStyle from "../style";
-import styled from "styled-components";
-import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
-import * as dat from "dat.gui";
+import {
+  Stage,
+  OrbitControls,
+  MeshDistortMaterial,
+  shaderMaterial,
+  useTexture,
+} from "@react-three/drei";
+import { useSpring } from "@react-spring/core";
+import { a } from "@react-spring/three";
+import glsl from "babel-plugin-glsl/macro";
+
+const AnimatedMaterial = a(MeshDistortMaterial);
+
+const LargeOrb = () => {
+  const sphere = useRef();
+  /* const portalMaterial = useRef();
+  useFrame((state, delta) => (portalMaterial.current.uTime += delta)) */
+  const [distort, setDistort] = useState(0);
+  const [hovered, setHovered] = useState(false);
+  const [down, setDown] = useState(false);
+  const [{ wobble, color }] = useSpring(
+    {
+      wobble: down ? 1.5 : hovered ? 1.1 : 1,
+      color: "white",
+    },
+    [hovered, down]
+  );
+  const texture = useTexture("/baked.png");
+
+  setTimeout(() => {
+    setDistort(0.75);
+  }, 3000);
+
+  return (
+    <a.mesh
+      position={[0, 2, 0]}
+      scale={wobble}
+      onPointerOver={() => setHovered(true)}
+      onPointerOut={() => setHovered(false)}
+      onPointerDown={() => setDown(true)}
+      onPointerUp={() => setDown(false)}
+      receiveShadow
+      ref={sphere}
+    >
+      <sphereBufferGeometry args={[1, 64, 64]} />
+      <AnimatedMaterial
+        map={texture}
+        attach="material"
+        distort={distort}
+        speed={3}
+        color={color}
+        envMapIntensity="0.5"
+        clearcoat="0.75"
+        clearcoatRoughness={0}
+        metalness={0.1}
+      />
+      {/* <portalMaterial ref={portalMaterial} blending={AdditiveBlending} uColorStart="silver" uColorEnd="white" /> */}
+    </a.mesh>
+  );
+};
+
+const Lights = () => (
+  <>
+    <ambientLight intensity={0.5} />
+    <pointLight position={[20, 30, 10]} />
+  </>
+);
 
 const IndexPage = () => {
-  const scene = new THREE.Scene();
-
-  useEffect(() => {
-    const canvas = document.querySelector("canvas.webgl");
-
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      window.innerWidth / window.innerHeight,
-      0.1,
-      100
-    );
-    camera.position.x = 1;
-    camera.position.y = 1;
-    camera.position.z = 1;
-    scene.add(camera);
-
-    const controls = new OrbitControls(camera, canvas);
-    controls.enableDamping = true;
-
-    const renderer = new THREE.WebGLRenderer({
-      canvas: canvas,
-    });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-
-    const move = () => {
-      controls.update();
-      renderer.render(scene, camera);
-      window.requestAnimationFrame(move);
-    };
-
-    move();
-  }, []);
-
-  const material = new THREE.MeshPhysicalMaterial();
-  material.color = new THREE.Color(0xA8A9AD);
-  material.metalness = 0.45;
-  material.roughness = 0.65;
-  material.reflectivity = 1;
-  material.clearcoat = 1;
-
-  const sphere = new THREE.Mesh(
-    new THREE.SphereGeometry(0.8, 32, 32),
-    material
-  );
-  sphere.position.x = 0;
-
-  const smallSphere = new THREE.Mesh(
-    new THREE.SphereGeometry(0.2, 16, 16),
-    material
-  );
-
-  smallSphere.position.x = 0.5;
-  smallSphere.position.y = 0.5;
-  smallSphere.position.z = -0.75;
-
-  scene.add(sphere, smallSphere);
-
-  const ambientLight = new THREE.AmbientLight(0xffffff, 1);
-  scene.add(ambientLight);
-
-  const pointLight = new THREE.PointLight(0xffffff, 0.5);
-  pointLight.position.x = 2;
-  pointLight.position.y = 3;
-  pointLight.position.z = 2;
-  scene.add(pointLight);
-
-  const gui = new dat.GUI();
-  gui.add(material, "metalness").min(0).max(1).step(0.0001);
-  gui.add(material, "roughness").min(0).max(1).step(0.0001);
-  gui.add(material, "reflectivity").min(0).max(1).step(0.0001);
-  gui.add(material, "clearcoat").min(0).max(1).step(0.0001);
+  const controls = useRef();
   return (
     <>
       <GlobalStyle />
-      <Container>
-        <canvas className="webgl"></canvas>
-      </Container>
+      <Canvas shadows camera={{ position: [4, -1, 8], fov: 35 }}>
+        <Lights />
+        <Suspense fallback={null}>
+          <Stage
+            controls={controls}
+            intensity={0.5}
+            preset="rembrandt"
+            shadows={{
+              type: "accumulative",
+              opacity: 2,
+            }}
+            adjustCamera={1}
+            environment="city"
+          >
+            <LargeOrb />
+          </Stage>
+        </Suspense>
+        <OrbitControls
+          ref={controls}
+          minPolarAngle={0}
+          maxPolarAngle={Math.PI / 1.9}
+          makeDefault
+        />
+      </Canvas>
     </>
   );
 };
 
-const Container = styled.div`
-  height: 100vh;
-  width: 100vw;
-  position: relative;
-  canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;
-  }
-`;
+const PortalMaterial = shaderMaterial(
+  {
+    uTime: 0,
+    uColorStart: new Color("hotpink"),
+    uColorEnd: new Color("white"),
+  },
+  glsl`
+    varying vec2 vUv;
+    void main() {
+      vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+      vec4 viewPosition = viewMatrix * modelPosition;
+      vec4 projectionPosition = projectionMatrix * viewPosition;
+      gl_Position = projectionPosition;
+      vUv = uv;
+    }`,
+  glsl`
+    #pragma glslify: cnoise3 = require(glsl-noise/classic/3d.glsl) 
+    uniform float uTime;
+    uniform vec3 uColorStart;
+    uniform vec3 uColorEnd;
+    varying vec2 vUv;
+    void main() {
+      vec2 displacedUv = vUv + cnoise3(vec3(vUv * 7.0, uTime * 0.1));
+      float strength = cnoise3(vec3(displacedUv * 5.0, uTime * 0.2));
+      float outerGlow = distance(vUv, vec2(0.5)) * 4.0 - 1.4;
+      strength += outerGlow;
+      strength += step(-0.2, strength) * 0.8;
+      strength = clamp(strength, 0.0, 1.0);
+      vec3 color = mix(uColorStart, uColorEnd, strength);
+      gl_FragColor = vec4(color, 1.0);
+    }`
+);
+
+extend({ PortalMaterial });
 
 export default IndexPage;
 
