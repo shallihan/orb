@@ -75,7 +75,7 @@ const IndexPage = () => {
   return (
     <>
       <GlobalStyle />
-      <Canvas shadows camera={{ position: [4, -1, 8], fov: 35 }}>
+      <Canvas shadows camera={{ position: [4, -1, 8], fov: 35, zoom: 0.5 }}>
         <Lights />
         <Suspense fallback={null}>
           <Stage
@@ -94,8 +94,13 @@ const IndexPage = () => {
         </Suspense>
         <OrbitControls
           ref={controls}
-          minPolarAngle={0}
-          maxPolarAngle={Math.PI / 1.9}
+          minPolarAngle={Math.PI / 2}
+          maxPolarAngle={Math.PI / 2}
+          enableDamping
+          enablePan={false}
+          enableRotate
+          enableZoom={false}
+          reverseOrbit={false}
           makeDefault
         />
       </Canvas>
