@@ -1,24 +1,31 @@
 import { Color } from "three";
 import React, { Suspense, useRef, useState, useEffect } from "react";
 import { Canvas, extend } from "@react-three/fiber";
+import { Physics, useSphere, Debug } from "@react-three/cannon";
 import GlobalStyle from "../style";
 import {
   Stage,
   OrbitControls,
   MeshDistortMaterial,
   shaderMaterial,
+  Bounds,
   useTexture,
 } from "@react-three/drei";
+import { Mirrors } from "../components";
 import { useSpring } from "@react-spring/core";
 import { a } from "@react-spring/three";
 import glsl from "babel-plugin-glsl/macro";
+import { data } from "../data";
 
 const AnimatedMaterial = a(MeshDistortMaterial);
 
 const LargeOrb = () => {
-  const sphere = useRef();
-  /* const portalMaterial = useRef();
-  useFrame((state, delta) => (portalMaterial.current.uTime += delta)) */
+  const [ref] = useSphere(() => ({
+    friction: 0.1,
+    onCollide: () => {
+      console.log("Hit");
+    },
+  }));
   const [distort, setDistort] = useState(0);
   const [hovered, setHovered] = useState(false);
   const [down, setDown] = useState(false);
@@ -44,7 +51,7 @@ const LargeOrb = () => {
       onPointerDown={() => setDown(true)}
       onPointerUp={() => setDown(false)}
       receiveShadow
-      ref={sphere}
+      ref={ref}
     >
       <sphereBufferGeometry args={[1, 64, 64]} />
       <AnimatedMaterial
@@ -65,7 +72,7 @@ const LargeOrb = () => {
 
 const Lights = () => (
   <>
-    <ambientLight intensity={0.5} />
+    <ambientLight intensity={0.5} args={[1, 64, 64]} />
     <pointLight position={[20, 30, 10]} />
   </>
 );
@@ -75,7 +82,7 @@ const IndexPage = () => {
   return (
     <>
       <GlobalStyle />
-      <Canvas shadows camera={{ position: [4, -1, 8], fov: 35, zoom: 0.5 }}>
+      <Canvas shadows camera={{ position: [4, -1, 8], fov: 35, zoom: 0.75 }}>
         <Lights />
         <Suspense fallback={null}>
           <Stage
@@ -87,9 +94,14 @@ const IndexPage = () => {
               opacity: 2,
             }}
             adjustCamera={1}
-            environment="city"
+            environment="sunset"
           >
-            <LargeOrb />
+            <Physics>
+              <Bounds fit>
+                <LargeOrb />
+              </Bounds>
+              <Mirrors />
+            </Physics>
           </Stage>
         </Suspense>
         <OrbitControls
