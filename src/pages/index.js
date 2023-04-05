@@ -1,4 +1,4 @@
-import * as THREE from 'three'
+import * as THREE from "three";
 import React, { Suspense, useRef, useState, useEffect } from "react";
 import { Canvas, extend } from "@react-three/fiber";
 import GlobalStyle from "../style";
@@ -13,8 +13,8 @@ import {
 import { Mirrors } from "../components";
 import { useSpring } from "@react-spring/core";
 import { a } from "@react-spring/three";
-import glsl from "babel-plugin-glsl/macro";
-import { data } from "../data";
+import { Perf } from "r3f-perf";
+import { Debug, RigidBody, Physics } from "@react-three/rapier";
 
 const AnimatedMaterial = a(MeshDistortMaterial);
 
@@ -60,7 +60,6 @@ const LargeOrb = () => {
         color={color}
         envMapIntensity="0.5"
         clearcoat="0.75"
-        
         clearcoatRoughness={0}
         metalness={0.1}
       />
@@ -82,6 +81,7 @@ const IndexPage = () => {
     <>
       <GlobalStyle />
       <Canvas shadows camera={{ position: [4, -1, 8], fov: 35, zoom: 0.75 }}>
+        <Perf position="top-left" />
         <Lights />
         <Suspense fallback={null}>
           <Stage
@@ -95,8 +95,13 @@ const IndexPage = () => {
             adjustCamera={1}
             environment="night"
           >
-            <LargeOrb />
-            <Mirrors />
+            <Physics>
+              <Debug />
+              <RigidBody type="fixed" colliders="ball">
+                <LargeOrb />
+              </RigidBody>
+              <Mirrors />
+            </Physics>
           </Stage>
         </Suspense>
         <OrbitControls

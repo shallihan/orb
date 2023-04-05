@@ -71,26 +71,27 @@ function render() {
   requestAnimationFrame(render);
 }
 
-function wrapMesh() {
-
-    console.log('wrapped');
-  for (var vertexIndex = 0; vertexIndex < planeMesh.geometry.vertices.length; vertexIndex++) {
-
-    var localVertex = planeMesh.geometry.vertices[vertexIndex].clone();
-    localVertex.z = 220;
+const wrapMesh = () => {
+  console.log(planeMesh);
+  const positionAttribute = planeMesh.geometry.getAttribute('position');
+  const vertex = new THREE.Vector3();
+  for (var vertexIndex = 0; vertexIndex < positionAttribute.count; vertexIndex++) {
+    var localVertex = vertex.fromBufferAttribute(positionAttribute, vertexIndex).clone();
+    console.log(localVertex);
+    localVertex.z = 200;
     var directionVector = new THREE.Vector3();
     directionVector.subVectors(sphereMesh.position, localVertex);
     directionVector.normalize();
 
     var ray = new THREE.Raycaster(localVertex, directionVector);
-
+    console.log(ray);
     var collisionResults = ray.intersectObject(sphereMesh);
-    console.log(collisionResults)
+    console.log(collisionResults);
     numCollisions += collisionResults.length;
 
     if (collisionResults.length > 0) {
-
-      planeMesh.geometry.vertices[vertexIndex].z = collisionResults[0].point.z + 5;
+      console.log('hello')
+      vertex.fromBufferAttribute(positionAttribute, vertexIndex).z = collisionResults[0].point.z + 5;
     }
   }
 
