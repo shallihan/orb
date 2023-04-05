@@ -60,7 +60,7 @@ const LargeOrb = () => {
         color={color}
         envMapIntensity="0.5"
         clearcoat="0.75"
-        wireframe
+        
         clearcoatRoughness={0}
         metalness={0.1}
       />
@@ -93,7 +93,7 @@ const IndexPage = () => {
               opacity: 2,
             }}
             adjustCamera={1}
-            environment="sunset"
+            environment="night"
           >
             <LargeOrb />
             <Mirrors />
