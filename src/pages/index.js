@@ -1,7 +1,6 @@
-import { Color } from "three";
+import * as THREE from 'three'
 import React, { Suspense, useRef, useState, useEffect } from "react";
 import { Canvas, extend } from "@react-three/fiber";
-import { Physics, useSphere, Debug } from "@react-three/cannon";
 import GlobalStyle from "../style";
 import {
   Stage,
@@ -19,13 +18,12 @@ import { data } from "../data";
 
 const AnimatedMaterial = a(MeshDistortMaterial);
 
+const raycaster = new THREE.Raycaster();
+console.log(raycaster);
+
 const LargeOrb = () => {
-  const [ref] = useSphere(() => ({
-    friction: 0.1,
-    onCollide: () => {
-      console.log("Hit");
-    },
-  }));
+  const ref = useRef();
+  console.log(ref.current);
   const [distort, setDistort] = useState(0);
   const [hovered, setHovered] = useState(false);
   const [down, setDown] = useState(false);
@@ -44,7 +42,7 @@ const LargeOrb = () => {
 
   return (
     <a.mesh
-      position={[0, 2, 0]}
+      position={[0, 0, 0]}
       scale={wobble}
       onPointerOver={() => setHovered(true)}
       onPointerOut={() => setHovered(false)}
@@ -62,6 +60,7 @@ const LargeOrb = () => {
         color={color}
         envMapIntensity="0.5"
         clearcoat="0.75"
+        wireframe
         clearcoatRoughness={0}
         metalness={0.1}
       />
@@ -96,12 +95,8 @@ const IndexPage = () => {
             adjustCamera={1}
             environment="sunset"
           >
-            <Physics>
-              <Bounds fit>
-                <LargeOrb />
-              </Bounds>
-              <Mirrors />
-            </Physics>
+            <LargeOrb />
+            <Mirrors />
           </Stage>
         </Suspense>
         <OrbitControls
@@ -119,41 +114,6 @@ const IndexPage = () => {
     </>
   );
 };
-
-const PortalMaterial = shaderMaterial(
-  {
-    uTime: 0,
-    uColorStart: new Color("hotpink"),
-    uColorEnd: new Color("white"),
-  },
-  glsl`
-    varying vec2 vUv;
-    void main() {
-      vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-      vec4 viewPosition = viewMatrix * modelPosition;
-      vec4 projectionPosition = projectionMatrix * viewPosition;
-      gl_Position = projectionPosition;
-      vUv = uv;
-    }`,
-  glsl`
-    #pragma glslify: cnoise3 = require(glsl-noise/classic/3d.glsl) 
-    uniform float uTime;
-    uniform vec3 uColorStart;
-    uniform vec3 uColorEnd;
-    varying vec2 vUv;
-    void main() {
-      vec2 displacedUv = vUv + cnoise3(vec3(vUv * 7.0, uTime * 0.1));
-      float strength = cnoise3(vec3(displacedUv * 5.0, uTime * 0.2));
-      float outerGlow = distance(vUv, vec2(0.5)) * 4.0 - 1.4;
-      strength += outerGlow;
-      strength += step(-0.2, strength) * 0.8;
-      strength = clamp(strength, 0.0, 1.0);
-      vec3 color = mix(uColorStart, uColorEnd, strength);
-      gl_FragColor = vec4(color, 1.0);
-    }`
-);
-
-extend({ PortalMaterial });
 
 export default IndexPage;
 

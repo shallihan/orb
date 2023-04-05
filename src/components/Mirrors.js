@@ -1,15 +1,12 @@
 import React from "react";
-import { useSphere } from "@react-three/cannon";
 import { Depth, Fresnel, LayerMaterial } from "lamina";
 import { data } from "../data";
 
 const Mirrors = () => {
-  const [ref] = useSphere(() => ({ friction: 0.1 }));
-  console.log(ref);
   return (
     <group position={[0, -1.5, 0]}>
       {data.mirrors.map((mirror, index) => (
-        <mesh position={mirror.position} rotation={mirror.rotation} ref={ref}>
+        <mesh position={mirror.position} rotation={mirror.rotation}>
           <LayerMaterial
             color={"#ffffff"}
             lighting={"physical"} //
