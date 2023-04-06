@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import React, { Suspense, useRef, useState, useEffect } from "react";
-import { Canvas, extend } from "@react-three/fiber";
+import { Canvas, extend, useFrame } from "@react-three/fiber";
 import GlobalStyle from "../style";
 import {
   Stage,
@@ -14,7 +14,7 @@ import { Mirrors } from "../components";
 import { useSpring } from "@react-spring/core";
 import { a } from "@react-spring/three";
 import { Perf } from "r3f-perf";
-import { Debug, RigidBody, Physics } from "@react-three/rapier";
+import { Physics, useSphere } from "@react-three/cannon";
 
 const AnimatedMaterial = a(MeshDistortMaterial);
 
@@ -81,7 +81,7 @@ const IndexPage = () => {
     <>
       <GlobalStyle />
       <Canvas shadows camera={{ position: [4, -1, 8], fov: 35, zoom: 0.75 }}>
-        <Perf position="top-left" />
+        {/* <Perf position="top-left" /> */}
         <Lights />
         <Suspense fallback={null}>
           <Stage
@@ -95,11 +95,8 @@ const IndexPage = () => {
             adjustCamera={1}
             environment="night"
           >
-            <Physics>
-              <Debug />
-              <RigidBody type="fixed" colliders="ball">
-                <LargeOrb />
-              </RigidBody>
+            <Physics gravity={[0, 2, 0]} iterations={10}>
+              <LargeOrb />
               <Mirrors />
             </Physics>
           </Stage>
@@ -119,6 +116,7 @@ const IndexPage = () => {
     </>
   );
 };
+
 
 export default IndexPage;
 
