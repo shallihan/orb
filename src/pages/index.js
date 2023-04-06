@@ -1,13 +1,12 @@
 import * as THREE from "three";
-import React, { Suspense, useRef, useState, useEffect } from "react";
-import { Canvas, extend, useFrame } from "@react-three/fiber";
+import React, { Suspense, useRef, useState } from "react";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import GlobalStyle from "../style";
 import {
   Stage,
   OrbitControls,
   MeshDistortMaterial,
-  shaderMaterial,
-  Bounds,
+  Float,
   useTexture,
 } from "@react-three/drei";
 import { Mirrors } from "../components";
@@ -21,9 +20,23 @@ const AnimatedMaterial = a(MeshDistortMaterial);
 const raycaster = new THREE.Raycaster();
 console.log(raycaster);
 
+/* function Pointer() {
+  const viewport = useThree((state) => state.viewport);
+  const [, api] = useSphere(() => ({
+    type: "Kinematic",
+    args: [3],
+    position: [0, 0, 0],
+  }));
+  return useFrame((state) =>
+    api.position.set(
+      (state.mouse.x * viewport.width) / 2,
+      (state.mouse.y * viewport.height) / 2,
+      0
+    )
+  );
+} */
+
 const LargeOrb = () => {
-  const ref = useRef();
-  console.log(ref.current);
   const [distort, setDistort] = useState(0);
   const [hovered, setHovered] = useState(false);
   const [down, setDown] = useState(false);
@@ -49,7 +62,6 @@ const LargeOrb = () => {
       onPointerDown={() => setDown(true)}
       onPointerUp={() => setDown(false)}
       receiveShadow
-      ref={ref}
     >
       <sphereBufferGeometry args={[1, 64, 64]} />
       <AnimatedMaterial
@@ -62,6 +74,7 @@ const LargeOrb = () => {
         clearcoat="0.75"
         clearcoatRoughness={0}
         metalness={0.1}
+        wireframe
       />
       {/* <portalMaterial ref={portalMaterial} blending={AdditiveBlending} uColorStart="silver" uColorEnd="white" /> */}
     </a.mesh>
@@ -93,9 +106,9 @@ const IndexPage = () => {
               opacity: 2,
             }}
             adjustCamera={1}
-            environment="night"
+            environment="sunset"
           >
-            <Physics gravity={[0, 2, 0]} iterations={10}>
+            <Physics gravity={[0, 2, 0]}>
               <LargeOrb />
               <Mirrors />
             </Physics>
@@ -116,7 +129,6 @@ const IndexPage = () => {
     </>
   );
 };
-
 
 export default IndexPage;
 

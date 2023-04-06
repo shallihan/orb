@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { Depth, Fresnel, LayerMaterial } from "lamina";
 import { data } from "../data";
 import { RigidBody } from "@react-three/rapier";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { Physics, useSphere } from "@react-three/cannon";
 
 const rfs = THREE.MathUtils.randFloatSpread;
@@ -24,7 +24,7 @@ const Mirrors = ({
     mass: 0.5,
     angularDamping: 0.1,
     linearDamping: 0.65,
-    position: [rfs(10), rfs(10), rfs(10)],
+    position: [rfs(5), rfs(5), rfs(5)],
   }));
   useFrame((state) => {
     for (let i = 0; i < 6; i++) {
@@ -73,7 +73,7 @@ const Mirrors = ({
         />
       </LayerMaterial>
       <sphereBufferGeometry
-        args={[0.2, 32, 32]}
+        args={[getRandomFloat(0.1, 0.2, 2), 32, 32]}
       />
     </instancedMesh>
   );
