@@ -1,12 +1,11 @@
 import * as THREE from "three";
 import React, { Suspense, useRef, useState } from "react";
-import { Canvas, useThree, useFrame } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import GlobalStyle from "../style";
 import {
   Stage,
   OrbitControls,
   MeshDistortMaterial,
-  Float,
   useTexture,
 } from "@react-three/drei";
 import { Mirrors } from "../components";
