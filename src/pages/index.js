@@ -36,7 +36,7 @@ console.log(raycaster);
 } */
 
 const LargeOrb = () => {
-  const [distort, setDistort] = useState(0);
+  const [distort, setDistort] = useState(0.75);
   const [hovered, setHovered] = useState(false);
   const [down, setDown] = useState(false);
   const [{ wobble, color }] = useSpring(
@@ -48,10 +48,6 @@ const LargeOrb = () => {
   );
   const texture = useTexture("/baked.png");
 
-  setTimeout(() => {
-    setDistort(0.75);
-  }, 3000);
-
   return (
     <a.mesh
       position={[0, 0, 0]}
@@ -62,7 +58,7 @@ const LargeOrb = () => {
       onPointerUp={() => setDown(false)}
       receiveShadow
     >
-      <sphereBufferGeometry args={[1, 64, 64]} />
+      <sphereBufferGeometry args={[1, 64, 64]}/>
       <AnimatedMaterial
         map={texture}
         attach="material"

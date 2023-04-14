@@ -26,9 +26,11 @@ const Mirrors = ({
     linearDamping: 0.65,
     position: [rfs(5), rfs(5), rfs(5)],
   }));
+  console.log('Spheres', ref);
   useFrame((state) => {
     for (let i = 0; i < 6; i++) {
       // Get current whereabouts of the instanced sphere
+      ref.current.rotation.x=ref.current.rotation.y += 0.001
       ref.current.getMatrixAt(i, mat);
       // Normalize the position and multiply by a negative force.
       // This is enough to drive it towards the center-point.
