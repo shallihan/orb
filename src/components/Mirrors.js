@@ -1,10 +1,8 @@
-import React, { useRef } from "react";
+import React from "react";
 import * as THREE from "three";
 import { Depth, Fresnel, LayerMaterial } from "lamina";
-import { data } from "../data";
-import { RigidBody } from "@react-three/rapier";
-import { useFrame, useThree } from "@react-three/fiber";
-import { Physics, useSphere } from "@react-three/cannon";
+import { useFrame } from "@react-three/fiber";
+import { useSphere } from "@react-three/cannon";
 
 const rfs = THREE.MathUtils.randFloatSpread;
 
@@ -19,6 +17,7 @@ const Mirrors = ({
   vec = new THREE.Vector3(),
   ...props
 }) => {
+
   const [ref, api] = useSphere(() => ({
     args: [1],
     mass: 0.5,
@@ -26,11 +25,11 @@ const Mirrors = ({
     linearDamping: 0.65,
     position: [rfs(5), rfs(5), rfs(5)],
   }));
-  console.log('Spheres', ref);
+
   useFrame((state) => {
     for (let i = 0; i < 6; i++) {
       // Get current whereabouts of the instanced sphere
-      ref.current.rotation.x=ref.current.rotation.y += 0.001
+      ref.current.rotation.x = ref.current.rotation.y += 0.001;
       ref.current.getMatrixAt(i, mat);
       // Normalize the position and multiply by a negative force.
       // This is enough to drive it towards the center-point.
@@ -40,17 +39,14 @@ const Mirrors = ({
           vec
             .setFromMatrixPosition(mat)
             .normalize()
-            .multiplyScalar(-50)
+            .multiplyScalar(-100)
             .toArray(),
           [0, 0, 0]
         );
     }
   });
   return (
-    <instancedMesh
-      ref={ref}
-      args={[null, null, 7]}
-    >
+    <instancedMesh ref={ref} args={[null, null, 7]}>
       <LayerMaterial
         color={"#ffffff"}
         lighting={"physical"} //
@@ -74,9 +70,7 @@ const Mirrors = ({
           mode={"softlight"}
         />
       </LayerMaterial>
-      <sphereBufferGeometry
-        args={[getRandomFloat(0.1, 0.2, 2), 32, 32]}
-      />
+      <sphereBufferGeometry args={[getRandomFloat(0.1, 0.2, 2), 32, 32]} />
     </instancedMesh>
   );
 };

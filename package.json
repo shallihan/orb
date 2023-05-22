@@ -23,6 +23,7 @@
     "@types/three": "^0.149.0",
     "babel-plugin-glsl": "^1.0.0",
     "babel-plugin-styled-components": "^2.0.7",
+    "cannon-es": "^0.20.0",
     "dat.gui": "^0.7.9",
     "gatsby": "^5.7.0",
     "gatsby-plugin-image": "^3.8.0",
