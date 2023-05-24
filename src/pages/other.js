@@ -1,9 +1,10 @@
 import * as THREE from "three";
-import React, { Suspense, useRef } from "react";
-import { Canvas } from "@react-three/fiber";
+import React, { Suspense, useRef, useEffect } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
 import GlobalStyle from "../style";
-import { Physics, useSphere, Debug } from "@react-three/cannon";
+import { Physics, useSphere, Debug, useSpring } from "@react-three/cannon";
 import { Stage, OrbitControls } from "@react-three/drei";
+import * as CANNON from "cannon-es";
 import { Mesh } from "three";
 
 const rfs = THREE.MathUtils.randFloatSpread;
@@ -21,12 +22,13 @@ const Lights = () => (
   </>
 );
 
-const Planet = () => {
-  const [ref, api] = useSphere(
-    () => ({
-      type: "Static",
-    }),
-    useRef < Mesh > null
+const Planet = ({ props, forwardRef }) => {
+  const [ref, { position }] = useSphere(
+    () => ({ args: [1, 32, 32], type: "Kinematic", ...props }),
+    forwardRef
+  );
+  useFrame(({ mouse: { x, y }, viewport: { height, width } }) =>
+    position.set((x * width) / 2, (y * height) / 2, 0)
   );
   return (
     <mesh receiveShadow ref={ref}>
@@ -36,40 +38,36 @@ const Planet = () => {
   );
 };
 
-const Moons = ({
-  mat = new THREE.Matrix4(),
-  vec = new THREE.Vector3(),
-  ...props
-}) => {
-  const [ref, api] = useSphere(() => ({
-    position: [rfs(3), rfs(3), rfs(3)],
-    type: "Static",
-  }));
-
+const Moon = ({ props, forwardRef }) => {
+  const [ref] = useSphere(
+    () => ({
+      args: [0.1, 32, 32],
+      linearDamping: 0.5,
+      mass: 1,
+      ...props,
+    }),
+    forwardRef
+  );
   return (
-    <instancedMesh ref={ref} args={[null, null, 7]}>
-      <sphereBufferGeometry args={[getRandomFloat(0.1, 0.2, 2), 32, 32]} />
+    <mesh receiveShadow ref={ref}>
+      <sphereGeometry args={[0.1, 64, 64]} />
       <meshStandardMaterial color="blue" transparent opacity={0.5} />
-    </instancedMesh>
+    </mesh>
   );
 };
 
-const Moon = () => {
-    const [ref, api] = useSphere(
-        () => ({
-            args: [0.1],
-            mass: 0,
-            position: [rfs(3), rfs(3), rfs(3)],
-            type: "Static",
-        }),
-        useRef < Mesh > null
-      );
-      return (
-        <mesh receiveShadow ref={ref}>
-          <sphereGeometry args={[0.1, 32, 32]} />
-          <meshStandardMaterial color="blue" transparent opacity={0.5} />
-        </mesh>
-      );
+const PlanetAndMoon = () => {
+  const [planet, moon, api] = useSpring(useRef(null), useRef(null), {
+    damping: 1,
+    restLength: 0,
+    stiffness: 100,
+  });
+  return (
+    <group>
+      <Planet forwardRef={planet} position={[0, 0, 0]} />
+      <Moon forwardRef={moon} position={[-1.1, 0, 0]} />
+    </group>
+  );
 };
 
 const Other = () => {
@@ -91,10 +89,9 @@ const Other = () => {
             adjustCamera={1}
             environment="sunset"
           >
-            <Physics allowSleep>
+            <Physics gravity={[0, -40, 0]} allowSleep={false}>
               <Debug>
-                <Planet />
-                <Moon />
+                <PlanetAndMoon />
               </Debug>
             </Physics>
           </Stage>
