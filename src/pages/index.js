@@ -13,7 +13,6 @@ import { useSpring } from "@react-spring/core";
 import { a } from "@react-spring/three";
 import { Perf } from "r3f-perf";
 import { Physics, useSphere, Debug } from "@react-three/cannon";
-import { Mesh } from "three";
 
 const AnimatedMaterial = a(MeshDistortMaterial);
 
@@ -39,7 +38,7 @@ const LargeOrb = () => {
     () => ({
       type: "Static",
     }),
-    useRef < Mesh > null
+    useRef(null)
   );
 
   const damping = 0.1;
@@ -94,44 +93,6 @@ const LargeOrb = () => {
     setNormalsClone(
       JSON.parse(JSON.stringify(sphere.current.attributes.normal.array))
     );
-    if (sphere.current) {
-      const now = Date.now() / 300;
-
-      for (let i = 0; i < pointCount; i++) {
-        // indices
-        const ix = i * 3;
-        const iy = i * 3 + 1;
-        const iz = i * 3 + 2;
-
-        // use uvs to calculate wave
-        // use uvs to calculate wave
-        const uX = sphere.current.attributes.uv.getX(i) * Math.PI * 3;
-        const uY = sphere.current.attributes.uv.getY(i) * Math.PI * 3;
-
-        // calculate current vertex wave height
-        const xangle = uX + now;
-        const xsin = Math.sin(xangle) * damping;
-        const yangle = uY + now;
-        const ycos = Math.cos(yangle) * damping;
-
-        // set new position
-        sphere.current.attributes.position.setX(
-          i,
-          positionClone[ix] + normalsClone[ix] * (xsin + ycos)
-        );
-        sphere.current.attributes.position.setY(
-          i,
-          positionClone[iy] + normalsClone[iy] * (xsin + ycos)
-        );
-        sphere.current.attributes.position.setZ(
-          i,
-          positionClone[iz] + normalsClone[iz] * (xsin + ycos)
-        );
-      }
-
-      sphere.current.computeVertexNormals();
-      sphere.current.attributes.position.needsUpdate = true;
-    }
   }, [sphere]);
 
   return (
