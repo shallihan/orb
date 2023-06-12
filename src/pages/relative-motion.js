@@ -179,9 +179,9 @@ const PlanetAndMoon = () => {
       <Planet forwardRef={planet} position={[0, 0, 0]} name={"planet"} />
       <Moon
         forwardRef={moon}
-        position={moons[4].position}
-        args={moons[4].args}
-        name={moons[4].name}
+        position={moons[0].position}
+        args={moons[0].args}
+        name={moons[0].name}
       />
     </group>
   );
