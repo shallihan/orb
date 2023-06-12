@@ -2,7 +2,7 @@ import React, { Suspense, useEffect, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import GlobalStyle from "../style";
 import { Depth, Fresnel, LayerMaterial } from "lamina";
-import { Physics, useSphere, Debug, useSpring } from "@react-three/cannon";
+import { Physics, useSphere, Debug, useRaycastVehicle } from "@react-three/cannon";
 import { a } from "@react-spring/three";
 import {
   Stage,
@@ -18,8 +18,6 @@ const moons = [
   { name: "europa", position: [0.5, 0.7, -0.7], args: [0.1, 64, 64] },
   { name: "helene", position: [1.05, 0.3, 0], args: [0.1, 64, 64] },
   { name: "oberon", position: [-1.3, 0, 0], args: [0.3, 64, 64] },
-  { name: "titan", position: [0.1, 0, 1.1], args: [0.1, 64, 64] },
-  { name: "portia", position: [0.85, -0.7, 0], args: [0.1, 64, 64] },
 ];
 
 const Lights = () => (
@@ -105,39 +103,72 @@ const Moon = ({ position, args, name, forwardRef }) => {
 };
 
 const PlanetAndMoon = () => {
-  const [planet, moon] = useSpring(useRef(null), useRef([]), {
-    damping: 1,
-    restLength: 0,
-    stiffness: 100,
-  });
+  const chassis = useRef();
+  const moon1 = useRef();
+  const moon2 = useRef();
+  const moon3 = useRef();
+  const moon4 = useRef();
+
+  const wheelInfo = {
+    radius: 0.1,
+    directionLocal: [0, -1, 0],
+    suspensionStiffness: 30,
+    suspensionRestLength: 0.3,
+    axleLocal: [-1, 0, 0],
+    chassisConnectionPointLocal: [1, 0, 1],
+    useCustomSlidingRotationalSpeed: true,
+    customSlidingRotationalSpeed: -0.1,
+    frictionSlip: 1.5,
+    sideAcceleration: 2
+  }
+
+  const wheelInfo1 = { ...wheelInfo, isFrontWheel: true, chassisConnectionPointLocal: [-1 / 2, 1, 1] }
+  const wheelInfo2 = { ...wheelInfo, isFrontWheel: true, chassisConnectionPointLocal: [1/ 2, 1, 1] }
+  const wheelInfo3 = { ...wheelInfo, isFrontWheel: false, chassisConnectionPointLocal: [1 / 2, 1, -1] }
+  const wheelInfo4 = { ...wheelInfo, isFrontWheel: false, chassisConnectionPointLocal: [1 / 2, 1, -1] }
+
+  const [vehicle, api] = useRaycastVehicle(() => ({
+    chassisBody: chassis,
+    wheels: [moon1, moon2, moon3, moon4],
+    wheelInfos: [wheelInfo1, wheelInfo2, wheelInfo3, wheelInfo4],
+    indexForwardAxis: 2,
+    indexRightAxis: 0,
+    indexUpAxis: 1
+  }));
+  
 
   return (
-    <group>
-      <Planet forwardRef={planet} position={[0, 0, 0]} name={"planet"} />
+    <group ref={vehicle}>
+      <Planet forwardRef={chassis} position={[0, 0, 0]} name={"planet"} />
        <Moon
-        forwardRef={moon}
+        forwardRef={moon1}
         position={moons[0].position}
         args={moons[0].args}
         name={moons[0].name}
       />
-      {/* Cannon useSpring can only anchor two bodies  */}
-      {/* {moons.length > 1 &&
-        moons.map((m, index) => {
-          return (
-            <Moon
-              key={index}
-              forwardRef={(el) => (moon.current[index] = el)}
-              position={m.position}
-              args={m.args}
-              name={m.name}
-            />
-          );
-        })} */}
+      <Moon
+        forwardRef={moon2}
+        position={moons[1].position}
+        args={moons[1].args}
+        name={moons[1].name}
+      />
+       <Moon
+        forwardRef={moon3}
+        position={moons[2].position}
+        args={moons[2].args}
+        name={moons[2].name}
+      />
+       <Moon
+        forwardRef={moon4}
+        position={moons[3].position}
+        args={moons[3].args}
+        name={moons[3].name}
+      />
     </group>
   );
 };
 
-const RelativeMotion = () => {
+const Raycast = () => {
   const controls = useRef();
   return (
     <>
@@ -175,4 +206,4 @@ const RelativeMotion = () => {
   );
 };
 
-export default RelativeMotion;
+export default Raycast;
