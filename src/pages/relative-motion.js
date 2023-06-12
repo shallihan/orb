@@ -177,12 +177,15 @@ const PlanetAndMoon = () => {
   return (
     <group>
       <Planet forwardRef={planet} position={[0, 0, 0]} name={"planet"} />
-      <Moon
+     {/*  <Moon
         forwardRef={moon}
         position={moons[0].position}
         args={moons[0].args}
         name={moons[0].name}
-      />
+      /> */}
+      {moons.map((m, i) => <Moon forwardRef={el => moon.current[i] = el} position={m[i].position}
+        args={m[i].args}
+        name={m[i].name} />)}
     </group>
   );
 };
