@@ -1,5 +1,7 @@
 import * as THREE from "three";
+import styled from "styled-components";
 import React, { Suspense, useEffect, useRef, useState } from "react";
+import { Link } from "gatsby";
 import { Canvas, useFrame } from "@react-three/fiber";
 import GlobalStyle from "../style";
 import {
@@ -140,8 +142,10 @@ const IndexPage = () => {
   return (
     <>
       <GlobalStyle />
+      <div style={{ position: 'relative' }}>
+      <Button to="/relative-motion" >Relative Motion</Button>
       <Canvas shadows camera={{ position: [4, -1, 8], fov: 35, zoom: 0.75 }}>
-        {/* <Perf position="top-left" /> */}
+        <Perf position="top-left" />
         <Lights />
         <Suspense fallback={null}>
           <Stage
@@ -175,10 +179,25 @@ const IndexPage = () => {
           makeDefault
         />
       </Canvas>
+      </div>
     </>
   );
 };
 
 export default IndexPage;
+
+const Button = styled(Link)`
+  position: absolute;
+  z-index: 100;
+  top: 2rem;
+  right: 2rem;
+  background: white;
+    color: black;
+    font-family: Arial, san-serif;
+    text-decoration: none;
+    font-size: 1.25rem;
+    padding: 0.875rem 1rem;
+    border-radius: 4px;
+`;
 
 export const Head = () => <title>Home Page</title>;
