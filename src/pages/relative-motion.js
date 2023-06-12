@@ -187,7 +187,7 @@ const PlanetAndMoon = () => {
   );
 };
 
-const Other = () => {
+const RelativeMotion = () => {
   const controls = useRef();
   return (
     <>
@@ -225,4 +225,4 @@ const Other = () => {
   );
 };
 
-export default Other;
+export default RelativeMotion;
